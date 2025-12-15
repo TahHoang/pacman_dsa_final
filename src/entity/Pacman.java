@@ -1,6 +1,7 @@
 package entity;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import main.GamePanel;
 
 public class Pacman extends Entity {
@@ -11,7 +12,37 @@ public class Pacman extends Entity {
     public int yVelocity = 0;
     private int speed = 8; // tileSize / 4
 
-    private Image up, down, left, right;
+private Image up, down, left, right;
+
+/**
+ * Handle keyboard input
+ * 
+ * PRESENTATION POINT:
+ * - USER INPUT HANDLING - Converts key presses to direction changes
+ * - Supports both arrow keys and WASD controls
+ * 
+ * @param e - KeyEvent from keyboard
+ */
+public void keyPressed(KeyEvent e) {
+    switch (e.getKeyCode()) {
+        case KeyEvent.VK_UP:
+        case KeyEvent.VK_W:
+            setDirection('U');
+            break;
+        case KeyEvent.VK_DOWN:
+        case KeyEvent.VK_S:
+            setDirection('D');
+            break;
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_A:
+            setDirection('L');
+            break;
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_D:
+            setDirection('R');
+            break;
+    }
+}
 
     public Pacman(GamePanel gp, int x, int y, int width, int height) {
         super(gp, x, y, width, height);

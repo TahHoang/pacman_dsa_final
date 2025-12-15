@@ -30,7 +30,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private final Image wallImageLvl2Tu;
 
     public Image pacmanUpImg, pacmanDownImg, pacmanLeftImg, pacmanRightImg;
-    private final Image blueGhostImg, redGhostImg, pinkGhostImg, orangeGhostImg;
+    public final Image blueGhostImg, redGhostImg, pinkGhostImg, orangeGhostImg;
 
     public HashSet<Entity> walls;
     public HashSet<Entity> foods;
@@ -162,13 +162,13 @@ public class GamePanel extends JPanel implements ActionListener {
                     wall.img = specialWallImg;
                     walls.add(wall);
                 } else if (tileMapChar == 'b') {
-                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, blueGhostImg));
+                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, blueGhostImg, false));
                 } else if (tileMapChar == 'r') {
-                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, redGhostImg));
+                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, redGhostImg, true));
                 } else if (tileMapChar == 'o') {
-                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, orangeGhostImg));
+                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, orangeGhostImg, false));
                 } else if (tileMapChar == 'p') {
-                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, pinkGhostImg));
+                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, pinkGhostImg, false));
                 } else if (tileMapChar == 'P') {
                     pacman = new Pacman(this, x, y, tileSize, tileSize);
                 } else if (tileMapChar == ' ') {
