@@ -8,30 +8,78 @@ import java.util.HashSet;
 /**
  * BFSPathfinder - Breadth-First Search algorithm for ghost pathfinding
  * 
- * PRESENTATION POINTS:
+ * ============================================================================
+ * GRAPH THEORY FOUNDATION
+ * ============================================================================
  * 
- * 1. BREADTH-FIRST SEARCH (BFS) ALGORITHM
- *    - Graph traversal algorithm
- *    - Explores nodes level by level (breadth-first)
- *    - GUARANTEES shortest path in unweighted graphs
- *    - Uses QUEUE data structure (FIFO)
+ * To enable the Ghost to intelligently track Pacman, we treat the game map 
+ * as an UNWEIGHTED GRAPH:
  * 
- * 2. TIME COMPLEXITY: O(V + E)
- *    - V = number of vertices (grid cells)
- *    - E = number of edges (connections between cells)
- *    - In grid: V = rows × cols, E ≈ 4V
- *    - Final: O(rows × cols)
+ * • NODES (Vertices): Every empty tile in the game is a Node
+ * • EDGES: The connections between adjacent tiles (up, down, left, right)
+ * • BLOCKED NODES: Walls are treated as unreachable/blocked nodes
+ * • UNWEIGHTED: All edges have equal cost (1 step = 1 tile movement)
  * 
- * 3. SPACE COMPLEXITY: O(V)
+ * ============================================================================
+ * BFS ALGORITHM PROCESS
+ * ============================================================================
+ * 
+ * The BFS process works as follows:
+ * 
+ * 1. SOURCE (G): The algorithm starts at the Ghost's current position
+ *    - Represented as the RED NODE in visualization
+ *    - This is our starting point in the graph
+ * 
+ * 2. EXPLORATION: It explores neighbor nodes LAYER BY LAYER
+ *    - Similar to a ripple expanding in water
+ *    - Level 0: Ghost's position
+ *    - Level 1: All tiles 1 step away
+ *    - Level 2: All tiles 2 steps away
+ *    - And so on...
+ * 
+ * 3. QUEUE: We use a QUEUE data structure (FIFO) to store valid nodes
+ *    - Ensures breadth-first exploration (closest nodes first)
+ *    - Guarantees shortest path is found first
+ * 
+ * 4. TARGET (P): The expansion stops immediately when the 'wave' hits Pacman
+ *    - Represented as the YELLOW NODE in visualization
+ *    - This is our destination in the graph
+ * 
+ * 5. BACKTRACKING: The algorithm traces the path BACKWARDS from Pacman to Ghost
+ *    - Uses parent links stored in each node
+ *    - Determines the exact next step the Ghost must take
+ *    - Path is reversed to get Ghost → Pacman direction sequence
+ * 
+ * ============================================================================
+ * ALGORITHM GUARANTEES
+ * ============================================================================
+ * 
+ * Thanks to BFS, the Ghost ALWAYS calculates the SHORTEST PATH to the player,
+ * making the game challenging and intelligent.
+ * 
+ * ============================================================================
+ * COMPLEXITY ANALYSIS
+ * ============================================================================
+ * 
+ * TIME COMPLEXITY: O(V + E)
+ *    - V = number of vertices (grid cells): rows × cols
+ *    - E = number of edges (connections): ≈ 4V in a grid
+ *    - Final: O(rows × cols) = O(21 × 19) = O(399)
+ * 
+ * SPACE COMPLEXITY: O(V)
  *    - Queue stores at most all vertices
  *    - HashSet stores visited vertices
  *    - Total: O(rows × cols)
  * 
+ * ============================================================================
  * WHY BFS FOR PACMAN?
- * - Finds shortest path (optimal ghost movement)
- * - Handles obstacles (walls) automatically
- * - Efficient for grid-based games
- * - Realistic AI behavior
+ * ============================================================================
+ * 
+ * ✓ Finds SHORTEST PATH (optimal ghost movement)
+ * ✓ Handles OBSTACLES (walls) automatically
+ * ✓ EFFICIENT for grid-based games
+ * ✓ Creates REALISTIC and CHALLENGING AI behavior
+ * ✓ GUARANTEED to find path if one exists
  */
 public class BFSPathfinder {
     
@@ -49,84 +97,144 @@ public class BFSPathfinder {
     /**
      * Find shortest path from start to target using BFS
      * 
-     * PRESENTATION - ALGORITHM OVERVIEW:
+     * ========================================================================
+     * ALGORITHM OVERVIEW - GRAPH TRAVERSAL
+     * ========================================================================
      * 
-     * INPUT: Start position (ghost), Target position (Pacman)
-     * OUTPUT: PathLinkedList of directions, or null if unreachable
+     * INPUT: 
+     *   - Start position: Ghost's location (SOURCE NODE - G)
+     *   - Target position: Pacman's location (TARGET NODE - P)
      * 
-     * STEPS:
-     * 1. Convert pixel coordinates to grid coordinates
-     * 2. Initialize queue with starting node
-     * 3. Initialize visited set (prevents cycles)
-     * 4. While queue not empty:
-     *    a. Dequeue current node
-     *    b. Check if reached target
-     *    c. Explore all 4 neighbors (Up, Down, Left, Right)
-     *    d. Add valid unvisited neighbors to queue
-     * 5. Reconstruct path by following parent links
-     * 6. Convert path to direction commands
+     * OUTPUT: 
+     *   - PathLinkedList with step-by-step directions (U/D/L/R)
+     *   - null if no path exists (Pacman unreachable)
+     * 
+     * ========================================================================
+     * BFS STEPS - THE "RIPPLE EFFECT"
+     * ========================================================================
+     * 
+     * STEP 1: COORDINATE TRANSFORMATION
+     *   - Convert pixel coordinates → grid coordinates (nodes)
+     *   - Validate bounds and ensure target isn't a wall
+     * 
+     * STEP 2: INITIALIZATION
+     *   - Create QUEUE (FIFO) with starting node (Ghost position)
+     *   - Create VISITED SET to track explored nodes
+     *   - Mark start as visited
+     * 
+     * STEP 3: BREADTH-FIRST EXPLORATION (The Ripple)
+     *   While queue is not empty:
+     *     a. DEQUEUE current node (explore closest unexplored node)
+     *     b. CHECK if we reached Pacman → SUCCESS!
+     *     c. EXPLORE all 4 neighbors (Up, Down, Left, Right)
+     *     d. For each valid neighbor:
+     *        - Skip if wall or out of bounds
+     *        - Skip if already visited
+     *        - Add to queue and mark visited
+     *        - Link parent (for backtracking)
+     * 
+     * STEP 4: BACKTRACKING
+     *   - Trace path from Pacman back to Ghost using parent links
+     *   - Reverse the path to get Ghost → Pacman directions
+     * 
+     * STEP 5: RETURN RESULT
+     *   - Return path as sequence of directions
+     *   - Return null if queue empties (no path exists)
+     * 
+     * ========================================================================
+     * VISUAL EXPLANATION
+     * ========================================================================
+     * 
+     * Level 0: [G]              ← Ghost starts here (RED NODE)
+     * Level 1: [·][·][·]        ← Explore immediate neighbors
+     * Level 2: [·][·][·][·][·]  ← Expand outward (ripple effect)
+     * Level 3: [·][P][·]        ← Found Pacman! (YELLOW NODE)
+     * 
+     * The "wave" expands until it hits Pacman, guaranteeing shortest path!
+     * 
+     * ========================================================================
      * 
      * @param startX - Ghost's current X position (pixels)
      * @param startY - Ghost's current Y position (pixels)
      * @param targetX - Pacman's X position (pixels)
      * @param targetY - Pacman's Y position (pixels)
-     * @return PathLinkedList with directions, or null if no path
+     * @return PathLinkedList with directions, or null if no path exists
      */
     public PathLinkedList findPath(int startX, int startY, int targetX, int targetY) {
         
         // === STEP 1: Convert pixel coordinates to grid coordinates ===
         // PRESENTATION POINT: Coordinate system transformation
+        // GRAPH THEORY: Convert pixel positions to NODES in the graph
         // Pixels → Tiles: divide by tileSize
-        int startRow = startY / gp.tileSize;
-        int startCol = startX / gp.tileSize;
-        int targetRow = targetY / gp.tileSize;
-        int targetCol = targetX / gp.tileSize;
+        // Round to nearest tile for better accuracy
+        int startRow = Math.round((float)startY / gp.tileSize);
+        int startCol = Math.round((float)startX / gp.tileSize);
+        int targetRow = Math.round((float)targetY / gp.tileSize);
+        int targetCol = Math.round((float)targetX / gp.tileSize);
+        
+        // Clamp to valid grid bounds
+        startRow = Math.max(0, Math.min(GamePanel.rowCount - 1, startRow));
+        startCol = Math.max(0, Math.min(GamePanel.columnCount - 1, startCol));
+        targetRow = Math.max(0, Math.min(GamePanel.rowCount - 1, targetRow));
+        targetCol = Math.max(0, Math.min(GamePanel.columnCount - 1, targetCol));
         
         // Edge case: Already at target
         if (startRow == targetRow && startCol == targetCol) {
             return new PathLinkedList();  // Return empty path
         }
         
+        // Edge case: Target is a wall (shouldn't happen but be safe)
+        if (isWall(targetRow, targetCol)) {
+            return null;
+        }
+        
         // === STEP 2: Initialize BFS data structures ===
         
         // QUEUE: Stores nodes to explore (FIFO - First In First Out)
         // PRESENTATION POINT: Queue is KEY to BFS algorithm
-        // - Ensures level-by-level exploration
+        // GRAPH THEORY: Queue ensures BREADTH-FIRST exploration
+        // - Ensures level-by-level exploration (ripple effect)
         // - Guarantees shortest path found first
         Queue<PathfindingNode> queue = new LinkedList<>();
         
         // VISITED SET: Tracks explored positions (prevents infinite loops)
         // PRESENTATION POINT: HashSet for O(1) lookup
+        // GRAPH THEORY: Prevents revisiting the same NODE
         // - Prevents revisiting same position
         // - Critical for algorithm termination
-        HashSet<PathfindingNode> visited = new HashSet<>();
+        HashSet<String> visited = new HashSet<>();
         
         // Create starting node (no parent)
+        // GRAPH THEORY: This is the SOURCE NODE (G) - Red Node
         PathfindingNode startNode = new PathfindingNode(startRow, startCol, null);
         
         // Add start to queue and mark as visited
         queue.offer(startNode);
-        visited.add(startNode);
+        visited.add(startRow + "," + startCol);
         
-        // === STEP 3: BFS MAIN LOOP ===
+        // === STEP 3: BFS MAIN LOOP - THE RIPPLE EFFECT ===
         // PRESENTATION POINT: This is the heart of BFS
+        // GRAPH THEORY: Layer-by-layer exploration like water ripples
         // Continue until queue is empty (all reachable nodes explored)
         
         while (!queue.isEmpty()) {
             
             // DEQUEUE: Remove and get first node from queue
             // PRESENTATION POINT: FIFO order ensures breadth-first
+            // GRAPH THEORY: Explore closest unexplored node first
             PathfindingNode current = queue.poll();
             
             // === STEP 4: Check if we reached the target ===
+            // GRAPH THEORY: Did our ripple reach the TARGET NODE (P) - Yellow Node?
             if (current.row == targetRow && current.col == targetCol) {
                 // SUCCESS! We found Pacman
-                // Now reconstruct the path from target back to start
+                // Now BACKTRACK the path from target back to start
                 return reconstructPath(current);
             }
             
-            // === STEP 5: Explore all 4 neighbors ===
+            // === STEP 5: Explore all 4 neighbors (expand the ripple) ===
             // PRESENTATION POINT: Grid has 4-connectivity (Up, Down, Left, Right)
+            // GRAPH THEORY: Explore all EDGES from current NODE
             // We explore in all directions to find shortest path
             
             // Try moving UP (row - 1)
@@ -143,6 +251,7 @@ public class BFSPathfinder {
         }
         
         // Queue is empty and target not found
+        // GRAPH THEORY: No path exists in the graph (Pacman unreachable)
         // This means Pacman is unreachable from ghost's position
         return null;
     }
@@ -156,12 +265,17 @@ public class BFSPathfinder {
      * 3. ENQUEUE - Add to queue for future exploration
      * 4. MARK VISITED - Prevent revisiting
      * 
+     * GRAPH THEORY:
+     * - This explores an EDGE from current node to neighbor
+     * - Validates the neighbor is a valid NODE (not wall, in bounds)
+     * - Adds valid neighbors to the exploration frontier (queue)
+     * - Parent link enables BACKTRACKING to reconstruct path
+     * 
      * ALGORITHM STEPS:
      * Step 1: Check if position is within grid bounds
      * Step 2: Check if position is a wall (obstacle)
-     * Step 3: Create new node for this position
-     * Step 4: Check if already visited (prevents cycles)
-     * Step 5: If valid, add to queue and mark visited
+     * Step 3: Check if already visited (prevents cycles)
+     * Step 4: If valid, create node, add to queue and mark visited
      * 
      * @param current - Current node we're expanding from
      * @param newRow - Row of neighbor to explore
@@ -170,10 +284,11 @@ public class BFSPathfinder {
      * @param visited - Set of already visited nodes
      */
     private void exploreNeighbor(PathfindingNode current, int newRow, int newCol,
-                                  Queue<PathfindingNode> queue, HashSet<PathfindingNode> visited) {
+                                  Queue<PathfindingNode> queue, HashSet<String> visited) {
         
         // STEP 1: Bounds checking
         // PRESENTATION POINT: Prevent array out of bounds errors
+        // GRAPH THEORY: Ensure node is within graph boundaries
         if (newRow < 0 || newRow >= GamePanel.rowCount || 
             newCol < 0 || newCol >= GamePanel.columnCount) {
             return;  // Out of bounds, skip this neighbor
@@ -181,24 +296,25 @@ public class BFSPathfinder {
         
         // STEP 2: Wall checking
         // PRESENTATION POINT: Obstacle avoidance
+        // GRAPH THEORY: Skip BLOCKED NODES (walls)
         if (isWall(newRow, newCol)) {
             return;  // Can't move through walls, skip
         }
         
-        // STEP 3: Create new node
-        // PRESENTATION POINT: Parent link enables path reconstruction
-        PathfindingNode neighbor = new PathfindingNode(newRow, newCol, current);
-        
-        // STEP 4: Check if already visited
-        // PRESENTATION POINT: HashSet.contains() is O(1)
-        if (visited.contains(neighbor)) {
+        // STEP 3: Check if already visited
+        // PRESENTATION POINT: String-based visited check for better reliability
+        // GRAPH THEORY: Prevent cycles - don't explore same node twice
+        String posKey = newRow + "," + newCol;
+        if (visited.contains(posKey)) {
             return;  // Already explored, skip
         }
         
-        // STEP 5: Valid neighbor found! Add to queue and mark visited
-        // PRESENTATION POINT: This expands the search frontier
-        queue.offer(neighbor);      // Add to end of queue
-        visited.add(neighbor);      // Mark as visited
+        // STEP 4: Valid neighbor found! Create node, add to queue and mark visited
+        // PRESENTATION POINT: This expands the search frontier (the ripple)
+        // GRAPH THEORY: Add new node to queue with parent link for backtracking
+        PathfindingNode neighbor = new PathfindingNode(newRow, newCol, current);
+        queue.offer(neighbor);      // Add to end of queue (expand the ripple)
+        visited.add(posKey);        // Mark as visited (don't revisit)
     }
     
     /**
@@ -239,20 +355,27 @@ public class BFSPathfinder {
      * 2. PATH REVERSAL - Build path backward, then reverse
      * 3. DIRECTION CALCULATION - Convert position changes to directions
      * 
+     * GRAPH THEORY:
+     * - Each node stores its PARENT (where we came from)
+     * - Following parent links traces the SHORTEST PATH backward
+     * - This is the BACKTRACKING phase mentioned in BFS description
+     * - We traverse from TARGET NODE (P - Yellow) back to SOURCE NODE (G - Red)
+     * 
      * ALGORITHM STEPS:
-     * Step 1: Start at target node
+     * Step 1: Start at target node (Pacman - Yellow Node)
      * Step 2: Follow parent link to previous node
      * Step 3: Calculate direction moved (current - parent)
-     * Step 4: Add direction to front of list (builds in reverse)
-     * Step 5: Repeat until reaching start node (parent = null)
+     * Step 4: Add direction to front of list (builds path in reverse)
+     * Step 5: Repeat until reaching start node (Ghost - Red Node, parent = null)
      * 
      * WHY THIS WORKS:
-     * - Each node stores parent (where we came from)
-     * - Following parents traces path backward
+     * - Each node stores parent (where we came from in the BFS search)
+     * - Following parents traces shortest path backward
      * - Adding to front reverses the path automatically
+     * - Result: Path from Ghost to Pacman with optimal directions
      * 
-     * @param targetNode - The node representing Pacman's position
-     * @return PathLinkedList with directions from ghost to Pacman
+     * @param targetNode - The node representing Pacman's position (Yellow Node)
+     * @return PathLinkedList with directions from Ghost to Pacman
      */
     private PathLinkedList reconstructPath(PathfindingNode targetNode) {
         PathLinkedList path = new PathLinkedList();

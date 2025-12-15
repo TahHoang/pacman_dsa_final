@@ -10,6 +10,7 @@ import java.util.Random;
 
 import entity.Entity;
 import entity.Ghost;
+import entity.SmartGhost;
 import entity.Pacman;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -164,7 +165,8 @@ public class GamePanel extends JPanel implements ActionListener {
                 } else if (tileMapChar == 'b') {
                     ghosts.add(new Ghost(this, x, y, tileSize, tileSize, blueGhostImg));
                 } else if (tileMapChar == 'r') {
-                    ghosts.add(new Ghost(this, x, y, tileSize, tileSize, redGhostImg));
+                    // RED GHOST uses SmartGhost with BFS pathfinding
+                    ghosts.add(new SmartGhost(this, x, y, tileSize, tileSize, redGhostImg));
                 } else if (tileMapChar == 'o') {
                     ghosts.add(new Ghost(this, x, y, tileSize, tileSize, orangeGhostImg));
                 } else if (tileMapChar == 'p') {
