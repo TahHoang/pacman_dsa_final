@@ -122,7 +122,16 @@ public class GamePanel extends JPanel implements ActionListener {
                 if (gameOver && e.getKeyCode() == KeyEvent.VK_SPACE) {
                     resetGame();
                 } else if (!gameOver && pacman != null) {
-                    pacman.keyPressed(e);
+                    int key = e.getKeyCode();
+                    if (key == KeyEvent.VK_UP) {
+                        pacman.setDirection('U');
+                    } else if (key == KeyEvent.VK_DOWN) {
+                        pacman.setDirection('D');
+                    } else if (key == KeyEvent.VK_LEFT) {
+                        pacman.setDirection('L');
+                    } else if (key == KeyEvent.VK_RIGHT) {
+                        pacman.setDirection('R');
+                    }
                 }
             }
         });
