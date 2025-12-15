@@ -2,6 +2,7 @@ package entity;
 
 import java.awt.*;
 import main.GamePanel;
+import java.awt.event.KeyEvent;
 
 /**
  * Pacman - Player-controlled character
@@ -21,19 +22,45 @@ public class Pacman extends Entity {
 
     // Current direction Pacman is moving
     public char direction = 'R';
-    
+
     // Next direction requested by player (allows buffering inputs)
     private char nextDirection = 'R';
-    
+
     // Velocity components (pixels per frame)
     public int xVelocity = 0;
     public int yVelocity = 0;
-    
+
     // Movement speed
     private int speed = 8; // tileSize / 4
 
-    // Animation images for each direction
-    private Image up, down, left, right;
+// Animation images for each direction
+private Image up, down, left, right;
+
+/**
+ * Handle keyboard input for Pacman movement
+ * 
+ * @param e - KeyEvent containing the pressed key
+ */
+public void keyPressed(KeyEvent e) {
+    switch (e.getKeyCode()) {
+        case KeyEvent.VK_UP:
+        case KeyEvent.VK_W:
+            setDirection('U');
+            break;
+        case KeyEvent.VK_DOWN:
+        case KeyEvent.VK_S:
+            setDirection('D');
+            break;
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_A:
+            setDirection('L');
+            break;
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_D:
+            setDirection('R');
+            break;
+    }
+}
 
     /**
      * Constructor - Create Pacman
@@ -43,10 +70,10 @@ public class Pacman extends Entity {
      * - Starts facing right (classic Pacman)
      * - Speed calculated for smooth grid movement
      * 
-     * @param gp - Game panel reference
-     * @param x - Starting X position
-     * @param y - Starting Y position
-     * @param width - Pacman width
+     * @param gp     - Game panel reference
+     * @param x      - Starting X position
+     * @param y      - Starting Y position
+     * @param width  - Pacman width
      * @param height - Pacman height
      */
     public Pacman(GamePanel gp, int x, int y, int width, int height) {
@@ -57,10 +84,10 @@ public class Pacman extends Entity {
         this.down = gp.pacmanDownImg;
         this.left = gp.pacmanLeftImg;
         this.right = gp.pacmanRightImg;
-        
+
         // Start with right-facing image (default)
         this.img = right;
-        
+
         // Calculate speed based on tile size for grid alignment
         this.speed = gp.tileSize / 4;
     }
@@ -84,8 +111,8 @@ public class Pacman extends Entity {
      * 
      * PRESENTATION POINTS:
      * 1. TWO-PHASE COLLISION DETECTION
-     *    Phase 1: Test if next direction is valid
-     *    Phase 2: Move in current direction with collision check
+     * Phase 1: Test if next direction is valid
+     * Phase 2: Move in current direction with collision check
      * 
      * 2. LOOK-AHEAD TESTING - Tests movement before committing
      * 
@@ -101,23 +128,23 @@ public class Pacman extends Entity {
      */
     public void update() {
         // === PHASE 1: Test if we can turn in the requested direction ===
-        
+
         // Calculate velocity for the requested next direction
         updateVelocity(nextDirection);
-        
+
         // TEST MOVE: Temporarily move in that direction
         x += xVelocity;
         y += yVelocity;
-        
+
         // Check for collisions with this test move
         boolean colWithNewDir = false;
         for (Entity wall : gp.walls) {
             if (gp.collision(this, wall)) {
-                colWithNewDir = true;  // Would hit a wall!
+                colWithNewDir = true; // Would hit a wall!
                 break;
             }
         }
-        
+
         // UNDO the test move (backtrack to original position)
         x -= xVelocity;
         y -= yVelocity;
@@ -128,10 +155,10 @@ public class Pacman extends Entity {
         }
 
         // === PHASE 2: Move in the current direction ===
-        
+
         // Set velocity based on current direction
         updateVelocity(this.direction);
-        
+
         // Actually move Pacman
         this.x += xVelocity;
         this.y += yVelocity;
@@ -145,7 +172,7 @@ public class Pacman extends Entity {
                 break;
             }
         }
-        
+
         // Update the displayed image based on current direction
         updateImage();
     }
@@ -162,10 +189,22 @@ public class Pacman extends Entity {
      */
     private void updateVelocity(char dir) {
         switch (dir) {
-            case 'U': xVelocity = 0; yVelocity = -speed; break;  // Up: negative Y
-            case 'D': xVelocity = 0; yVelocity = speed; break;   // Down: positive Y
-            case 'L': xVelocity = -speed; yVelocity = 0; break;  // Left: negative X
-            case 'R': xVelocity = speed; yVelocity = 0; break;   // Right: positive X
+            case 'U':
+                xVelocity = 0;
+                yVelocity = -speed;
+                break; // Up: negative Y
+            case 'D':
+                xVelocity = 0;
+                yVelocity = speed;
+                break; // Down: positive Y
+            case 'L':
+                xVelocity = -speed;
+                yVelocity = 0;
+                break; // Left: negative X
+            case 'R':
+                xVelocity = speed;
+                yVelocity = 0;
+                break; // Right: positive X
         }
     }
 
@@ -179,10 +218,18 @@ public class Pacman extends Entity {
      */
     private void updateImage() {
         switch (direction) {
-            case 'U': img = up; break;      // Show up-facing Pacman
-            case 'D': img = down; break;    // Show down-facing Pacman
-            case 'L': img = left; break;    // Show left-facing Pacman
-            case 'R': img = right; break;   // Show right-facing Pacman
+            case 'U':
+                img = up;
+                break; // Show up-facing Pacman
+            case 'D':
+                img = down;
+                break; // Show down-facing Pacman
+            case 'L':
+                img = left;
+                break; // Show left-facing Pacman
+            case 'R':
+                img = right;
+                break; // Show right-facing Pacman
         }
     }
 
@@ -196,11 +243,11 @@ public class Pacman extends Entity {
      */
     @Override
     public void reset() {
-        super.reset();              // Reset position (from Entity)
-        this.direction = 'R';       // Face right (default)
-        this.nextDirection = 'R';   // Clear buffered input
-        this.img = right;           // Show right-facing image
-        this.xVelocity = 0;         // Stop moving
-        this.yVelocity = 0;         // Stop moving
+        super.reset(); // Reset position (from Entity)
+        this.direction = 'R'; // Face right (default)
+        this.nextDirection = 'R'; // Clear buffered input
+        this.img = right; // Show right-facing image
+        this.xVelocity = 0; // Stop moving
+        this.yVelocity = 0; // Stop moving
     }
 }
